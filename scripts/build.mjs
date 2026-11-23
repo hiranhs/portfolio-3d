@@ -5,6 +5,7 @@ import * as esbuild from 'esbuild';
 import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+import tailwindConfig from '../tailwind.config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,9 +53,8 @@ export async function buildPortfolio({ isDev = false } = {}) {
   // 2. Compile Tailwind CSS via PostCSS programmatically
   const cssInputPath = path.join(rootDir, 'src', 'index.css');
   const rawCss = fs.readFileSync(cssInputPath, 'utf8');
-  const tailwindConfigPath = path.join(rootDir, 'tailwind.config.js');
   const cssResult = await postcss([
-    tailwindcss(tailwindConfigPath),
+    tailwindcss(tailwindConfig),
     autoprefixer(),
   ]).process(rawCss, {
     from: cssInputPath,
