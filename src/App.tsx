@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { AmbientSpace3D } from './components/AmbientSpace3D';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
@@ -7,11 +6,22 @@ import { ProjectsSection } from './components/ProjectsSection';
 import { AchievementsSection } from './components/AchievementsSection';
 import { GallerySection } from './components/GallerySection';
 import { ContactSection } from './components/ContactSection';
-import { MiniGameSection } from './components/MiniGameSection';
-import { LightboxModal, LightboxSlide } from './components/LightboxModal';
-import { ShowreelModal } from './components/ShowreelModal';
+import type { LightboxSlide } from './components/LightboxModal';
 import { HudOverlay } from './components/HudOverlay';
 import { GALLERY_ITEMS, GalleryItem, PROFILE } from './data/portfolioData';
+
+const AmbientSpace3D = lazy(() =>
+  import('./components/AmbientSpace3D').then((m) => ({ default: m.AmbientSpace3D }))
+);
+const MiniGameSection = lazy(() =>
+  import('./components/MiniGameSection').then((m) => ({ default: m.MiniGameSection }))
+);
+const LightboxModal = lazy(() =>
+  import('./components/LightboxModal').then((m) => ({ default: m.LightboxModal }))
+);
+const ShowreelModal = lazy(() =>
+  import('./components/ShowreelModal').then((m) => ({ default: m.ShowreelModal }))
+);
 
 const SECTION_IDS = ['home', 'about', 'projects', 'achievements', 'gallery', 'contact', 'mini-game'];
 
@@ -75,8 +85,10 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-[#030407] text-[#F4F7FF]">
-      {/* Fixed 3D WebGL Ambient Starfield & Cobalt Grid */}
-      <AmbientSpace3D />
+      {/* Fixed 3D WebGL Ambient Starfield & Cobalt Grid (code-split chunk) */}
+      <Suspense fallback={null}>
+        <AmbientSpace3D />
+      </Suspense>
 
       {/* Subtle Editorial Grid Grain */}
       <div
@@ -106,7 +118,9 @@ export default function App() {
         <div className="section-divider max-w-6xl mx-auto" />
         <ContactSection />
         <div className="section-divider max-w-6xl mx-auto" />
-        <MiniGameSection autoStartSignal={playGameSignal} />
+        <Suspense fallback={<div id="mini-game" className="h-64" />}>
+          <MiniGameSection autoStartSignal={playGameSignal} />
+        </Suspense>
       </main>
 
       {/* Footer */}
@@ -136,18 +150,24 @@ export default function App() {
 
       {/* Fullscreen Lightbox */}
       {lightboxState && (
-        <LightboxModal
-          slides={lightboxState.slides}
-          index={lightboxState.index}
-          onClose={() => setLightboxState(null)}
-          onNavigate={(nextIndex) =>
-            setLightboxState((prev) => (prev ? { ...prev, index: nextIndex } : null))
-          }
-        />
+        <Suspense fallback={null}>
+          <LightboxModal
+            slides={lightboxState.slides}
+            index={lightboxState.index}
+            onClose={() => setLightboxState(null)}
+            onNavigate={(nextIndex) =>
+              setLightboxState((prev) => (prev ? { ...prev, index: nextIndex } : null))
+            }
+          />
+        </Suspense>
       )}
 
       {/* Unity Gameplay Showreel Theater */}
-      <ShowreelModal open={showreelOpen} onClose={() => setShowreelOpen(false)} />
+      {showreelOpen && (
+        <Suspense fallback={null}>
+          <ShowreelModal open={showreelOpen} onClose={() => setShowreelOpen(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }

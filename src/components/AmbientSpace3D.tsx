@@ -26,13 +26,13 @@ export const AmbientSpace3D: React.FC = () => {
       return;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x030407, 1);
     container.appendChild(renderer.domElement);
 
     // 1. Perspective Electric Cobalt Cyber Terrain Grid
-    const planeGeo = new THREE.PlaneGeometry(76, 76, 44, 44);
+    const planeGeo = new THREE.PlaneGeometry(76, 76, 32, 32);
     planeGeo.rotateX(-Math.PI / 2);
     const basePositions = new Float32Array(planeGeo.attributes.position.array);
 

@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { ArrowRight, Download, Gamepad2, Play, Sparkles, Zap } from 'lucide-react';
 import { PROFILE } from '../data/portfolioData';
-import { HeroCanvas3D } from './HeroCanvas3D';
+
+const HeroCanvas3D = lazy(() =>
+  import('./HeroCanvas3D').then((m) => ({ default: m.HeroCanvas3D }))
+);
 
 interface HeroSectionProps {
   onOpenShowreel: () => void;
@@ -127,9 +130,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenShowreel }) => {
               className="relative mx-auto w-full max-w-[460px] xl:max-w-[490px] aspect-square cursor-pointer select-none flex items-center justify-center"
               title="Click to pulse the 3D Energy Core"
             >
-              {/* Layer 1: Live Three.js WebGL 3D Core */}
+              {/* Layer 1: Live Three.js WebGL 3D Core (lazy-loaded so hero paints immediately) */}
               <div className="absolute inset-0 z-0">
-                <HeroCanvas3D pulseTrigger={pulseCount} />
+                <Suspense fallback={null}>
+                  <HeroCanvas3D pulseTrigger={pulseCount} />
+                </Suspense>
               </div>
 
               {/* Layer 2: Volumetric Cobalt + Acid Backlight Aura */}
@@ -156,6 +161,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenShowreel }) => {
                 <img
                   src={PROFILE.portraitCutout}
                   alt="Tharindu Hiran Samaranayake"
+                  fetchPriority="high"
+                  decoding="async"
                   className="relative z-10 w-full h-auto object-contain portrait-stage-mask drop-shadow-[0_18px_40px_rgba(21,88,201,0.58)]"
                 />
               </div>

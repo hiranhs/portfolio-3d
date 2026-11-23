@@ -33,7 +33,7 @@ export const HeroCanvas3D: React.FC<HeroCanvas3DProps> = ({ pulseTrigger }) => {
       return;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
@@ -58,7 +58,7 @@ export const HeroCanvas3D: React.FC<HeroCanvas3DProps> = ({ pulseTrigger }) => {
     scene.add(rootGroup);
 
     // 1. Sculpted Electric Cobalt Torus-Knot Aura (echoing organic-futuristic blue sculpture in reference)
-    const knotGeo = new THREE.TorusKnotGeometry(1.95, 0.34, 140, 24, 2, 3);
+    const knotGeo = new THREE.TorusKnotGeometry(1.95, 0.34, 96, 18, 2, 3);
     const knotMat = new THREE.MeshPhysicalMaterial({
       color: 0x1558c9,
       emissive: 0x0b2e7a,

@@ -17,6 +17,7 @@ import { TiltCard3D } from './TiltCard3D';
 export const ProjectsSection: React.FC = () => {
   const [filter, setFilter] = useState<'all' | 'game' | 'app'>('all');
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [activeVideoIds, setActiveVideoIds] = useState<Record<string, boolean>>({});
 
   const visibleProjects = PROJECTS.filter((p) => (filter === 'all' ? true : p.category === filter));
 
@@ -196,38 +197,69 @@ export const ProjectsSection: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
-            {GAMEPLAY_VIDEOS.map((vid) => (
-              <div key={vid.id} className="glass-panel rounded-3xl overflow-hidden hud-bracket">
-                <div className="relative aspect-video bg-[#020306]">
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${vid.youtubeId}`}
-                    title={vid.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                    className="w-full h-full border-0"
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    <h4 className="font-display text-xl font-bold text-white">{vid.title}</h4>
-                    <span className="px-2.5 py-1 rounded-full bg-[#D4FF24]/15 border border-[#D4FF24]/40 font-mono text-[10px] uppercase tracking-widest text-[#D4FF24] whitespace-nowrap">
-                      {vid.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-[#A5B6D6] leading-relaxed mb-4">{vid.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {vid.tags.map((t) => (
-                      <span
-                        key={t}
-                        className="px-2.5 py-1 rounded-full bg-[#091227] border border-[#1558C9]/40 font-mono text-[10px] text-[#8AB8FF]"
+            {GAMEPLAY_VIDEOS.map((vid) => {
+              const isPlaying = Boolean(activeVideoIds[vid.id]);
+              return (
+                <div key={vid.id} className="glass-panel rounded-3xl overflow-hidden hud-bracket">
+                  <div className="relative aspect-video bg-[#020306] overflow-hidden">
+                    {isPlaying ? (
+                      <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${vid.youtubeId}?autoplay=1`}
+                        title={vid.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="w-full h-full border-0"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setActiveVideoIds((prev) => ({ ...prev, [vid.id]: true }))
+                        }
+                        aria-label={`Play ${vid.title}`}
+                        className="group relative w-full h-full block text-left"
                       >
-                        {t}
+                        <img
+                          src={`https://i.ytimg.com/vi/${vid.youtubeId}/hqdefault.jpg`}
+                          alt={vid.title}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-85 group-hover:opacity-100"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#030407]/85 via-[#030407]/25 to-transparent" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                          <span className="w-16 h-16 rounded-full bg-[#D4FF24] text-[#030407] flex items-center justify-center shadow-[0_0_32px_rgba(212,255,36,0.55)] transition-transform duration-300 group-hover:scale-110">
+                            <Play className="w-7 h-7 fill-current ml-1" />
+                          </span>
+                          <span className="px-3.5 py-1 rounded-full bg-[#030407]/80 border border-[#1558C9]/60 font-mono text-[10px] uppercase tracking-[0.2em] text-white backdrop-blur-md">
+                            Click to Play HD Footage
+                          </span>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <h4 className="font-display text-xl font-bold text-white">{vid.title}</h4>
+                      <span className="px-2.5 py-1 rounded-full bg-[#D4FF24]/15 border border-[#D4FF24]/40 font-mono text-[10px] uppercase tracking-widest text-[#D4FF24] whitespace-nowrap">
+                        {vid.status}
                       </span>
-                    ))}
+                    </div>
+                    <p className="text-sm text-[#A5B6D6] leading-relaxed mb-4">{vid.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {vid.tags.map((t) => (
+                        <span
+                          key={t}
+                          className="px-2.5 py-1 rounded-full bg-[#091227] border border-[#1558C9]/40 font-mono text-[10px] text-[#8AB8FF]"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

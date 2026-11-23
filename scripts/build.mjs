@@ -32,16 +32,24 @@ export async function buildPortfolio({ isDev = false } = {}) {
   const start = Date.now();
   fs.mkdirSync(distAssetsDir, { recursive: true });
 
-  // 1. Bundle React + TypeScript + Three.js + EmailJS + Lucide via esbuild
+  // Clean old hashed chunks before rebuilding
+  const chunksDir = path.join(distAssetsDir, 'chunks');
+  if (fs.existsSync(chunksDir)) {
+    fs.rmSync(chunksDir, { recursive: true, force: true });
+  }
+
+  // 1. Bundle with code-splitting so initial page loads fast and Three.js / modals stream in asynchronously
   await esbuild.build({
-    entryPoints: [path.join(rootDir, 'src', 'main.tsx')],
+    entryPoints: { app: path.join(rootDir, 'src', 'main.tsx') },
     bundle: true,
+    splitting: true,
     format: 'esm',
     target: ['es2020'],
     jsx: 'automatic',
     minify: !isDev,
     sourcemap: isDev,
-    outfile: path.join(distAssetsDir, 'app.js'),
+    outdir: distAssetsDir,
+    chunkNames: 'chunks/[name]-[hash]',
     define: {
       'process.env.NODE_ENV': JSON.stringify(isDev ? 'development' : 'production'),
     },
@@ -65,10 +73,11 @@ export async function buildPortfolio({ isDev = false } = {}) {
   // 3. Copy public/assets -> dist/assets
   copyDirRecursive(publicAssetsDir, distAssetsDir);
 
-  // 4. Generate dist/index.html with clean relative asset links (GitHub Pages ready)
+  // 4. Generate dist/index.html with clean relative asset links (GitHub Pages & CDN ready)
   const rawHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
   const builtHtml = rawHtml
     .replace('href="/assets/favicon.svg?v=2"', 'href="./assets/favicon.svg?v=2"')
+    .replace('href="/assets/hiran-portrait.png"', 'href="./assets/hiran-portrait.png"')
     .replace(
       '</head>',
       '    <link rel="stylesheet" href="./assets/style.css" />\n  </head>'
@@ -83,7 +92,7 @@ export async function buildPortfolio({ isDev = false } = {}) {
   const jsSizeKb = (fs.statSync(path.join(distAssetsDir, 'app.js')).size / 1024).toFixed(1);
   const cssSizeKb = (fs.statSync(path.join(distAssetsDir, 'style.css')).size / 1024).toFixed(1);
   console.log(
-    `[build] Built dist/ in ${Date.now() - start}ms — app.js (${jsSizeKb} KB), style.css (${cssSizeKb} KB)`
+    `[build] Built dist/ in ${Date.now() - start}ms — initial app.js (${jsSizeKb} KB), style.css (${cssSizeKb} KB)`
   );
 }
 
